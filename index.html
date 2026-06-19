@@ -48,7 +48,8 @@
   }
 
   @keyframes pisca-lento { 0%,100%{opacity:1} 50%{opacity:0} }
-  .piscando { animation: pisca-lento 2s infinite; }
+  /* Controle: sem piscar, só cor */
+  .piscando { /* sem animação no controle */ }
 
   /* TEMPO EXCEDIDO */
   .tempo-excedido {
@@ -653,16 +654,6 @@ document.addEventListener('keydown',function(e){
   }
 });
 function abrirTelao(){window.open('telao.html','_blank');setTimeout(broadcastEstado,800);}
-
-/* ── SINCRONISMO DE PISCAR ── */
-// Todos os elementos piscam juntos via tick global
-var tickPisca = true;
-setInterval(function(){
-  tickPisca = !tickPisca;
-  document.querySelectorAll('.piscando').forEach(function(el){
-    el.style.opacity = tickPisca ? '1' : '0';
-  });
-}, 600);
 
 function aplicarPiscar(el){ el.classList.add('piscando'); }
 function removerPiscar(el){ el.classList.remove('piscando'); el.style.opacity='1'; }
