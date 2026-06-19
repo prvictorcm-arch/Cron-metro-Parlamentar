@@ -179,6 +179,58 @@
     text-transform: uppercase; transition: all 0.15s; width: 100%; font-family: Arial, sans-serif;
   }
   .btn-limpar-v:hover { border-color: var(--red); color: var(--red); }
+  .btn-gerenciar-v {
+    background: var(--surface2); border: 1px solid var(--border); color: var(--text-dim);
+    border-radius: 6px; padding: 4px 10px; font-size: 0.72rem; cursor: pointer;
+    text-transform: uppercase; transition: all 0.15s; width: 100%; font-family: Arial, sans-serif;
+    margin-top: 2px;
+  }
+  .btn-gerenciar-v:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* Modal gerenciador de vereadores */
+  .modal-vereador { min-width: 420px; max-width: 520px; max-height: 80vh; display: flex; flex-direction: column; }
+  .modal-vereador h2 { font-size: 0.85rem; letter-spacing: 3px; text-transform: uppercase; color: var(--accent); margin-bottom: 14px; }
+  .v-add-row { display: flex; gap: 6px; margin-bottom: 12px; }
+  .v-add-row input {
+    flex: 1; background: var(--surface2); border: 1px solid var(--border); color: var(--text);
+    border-radius: 6px; padding: 6px 10px; font-size: 0.85rem; outline: none; font-family: Arial, sans-serif;
+    text-transform: uppercase;
+  }
+  .v-add-row input:focus { border-color: var(--accent); }
+  .v-add-row button {
+    background: var(--accent2); border: 1px solid var(--accent); color: var(--accent);
+    border-radius: 6px; padding: 6px 14px; font-size: 0.78rem; font-weight: 700;
+    cursor: pointer; text-transform: uppercase; transition: all 0.15s; font-family: Arial, sans-serif;
+    white-space: nowrap;
+  }
+  .v-add-row button:hover { background: var(--accent); color: #fff; }
+  .v-lista { flex: 1; overflow-y: auto; border: 1px solid var(--border); border-radius: 8px; }
+  .v-item {
+    display: flex; align-items: center; gap: 6px;
+    padding: 7px 10px; border-bottom: 1px solid var(--border);
+    transition: background 0.1s;
+  }
+  .v-item:last-child { border-bottom: none; }
+  .v-item:hover { background: var(--surface2); }
+  .v-item-nome { flex: 1; font-size: 0.82rem; color: var(--text); text-transform: uppercase; }
+  .v-item input {
+    flex: 1; background: var(--surface2); border: 1px solid var(--accent); color: var(--text);
+    border-radius: 4px; padding: 3px 8px; font-size: 0.82rem; outline: none;
+    font-family: Arial, sans-serif; text-transform: uppercase;
+  }
+  .v-btn-sm {
+    border: none; border-radius: 5px; padding: 4px 9px; font-size: 0.7rem; font-weight: 700;
+    cursor: pointer; transition: all 0.15s; font-family: Arial, sans-serif; text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .v-btn-edit  { background: var(--surface2); border: 1px solid var(--border); color: var(--text-dim); }
+  .v-btn-edit:hover  { border-color: var(--accent); color: var(--accent); }
+  .v-btn-save  { background: var(--accent2); border: 1px solid var(--accent); color: var(--accent); }
+  .v-btn-save:hover  { background: var(--accent); color: #fff; }
+  .v-btn-del   { background: #3a1010; border: 1px solid var(--red); color: var(--red); }
+  .v-btn-del:hover   { background: var(--red); color: #fff; }
+  .v-btn-up, .v-btn-down { background: var(--surface2); border: 1px solid var(--border); color: var(--text-dim); padding: 4px 7px; }
+  .v-btn-up:hover, .v-btn-down:hover { border-color: var(--accent); color: var(--accent); }
 
   /* CARD AÇÃO */
   .acao-card {
@@ -355,15 +407,25 @@
     <div class="card-label">Vereador</div>
     <select class="vereador-select" id="vereador-select" onchange="selecionarVereador(this.value)">
       <option value="">Selecionar...</option>
-      <option>BINA</option><option>DR. ERALDO</option>
-      <option>EDILSON MARTINS</option><option>ELIANE DO CAF&#201;</option>
-      <option>ELVIRA LIMA</option><option>ESCRIVÃO PARMA</option>
-      <option>H&#201;LIO HG</option><option>JADIR SOARES - PEPITA</option>
-      <option>MARCIO BERBET</option><option>MARCIO MORAES</option>
-      <option>PROF. GERALDO</option><option>SIDINEI JARDIM</option>
-      <option>SUBTENENTE MACEDO</option>
     </select>
-    <button class="btn-limpar-v" onclick="limparVereador()">Limpar vereador</button>
+    <button class="btn-limpar-v"    onclick="limparVereador()">Limpar vereador</button>
+    <button class="btn-gerenciar-v" onclick="abrirModalVereadores()">&#9997; Gerenciar lista</button>
+  </div>
+
+  <!-- Modal gerenciador de vereadores -->
+  <div class="modal-overlay" id="modal-vereadores">
+    <div class="modal-box modal-vereador">
+      <h2>Gerenciar Vereadores</h2>
+      <div class="v-add-row">
+        <input type="text" id="v-novo-nome" placeholder="Nome do vereador..." maxlength="60"
+               onkeydown="if(event.key==='Enter')adicionarVereador()">
+        <button onclick="adicionarVereador()">&#43; Adicionar</button>
+      </div>
+      <div class="v-lista" id="v-lista"></div>
+      <div class="modal-btns" style="margin-top:14px">
+        <button class="btn-modal" onclick="fecharModalVereadores()">Fechar</button>
+      </div>
+    </div>
   </div>
 
   <div class="acao-card">
@@ -640,8 +702,115 @@ function resetSecundario(){
   sincronizarAparte();sincronizarQO();
 }
 
-function selecionarVereador(v){document.getElementById('vereador-display').textContent=v.toUpperCase()||'';broadcastEstado();}
-function limparVereador(){document.getElementById('vereador-select').value='';document.getElementById('vereador-display').textContent='';broadcastEstado();}
+/* ── VEREADORES — lista gerenciável ── */
+var listaVereadores = [
+  'BINA','DR. ERALDO','EDILSON MARTINS','ELIANE DO CAFÉ','ELVIRA LIMA',
+  'ESCRIVÃO PARMA','HÉLIO HG','JADIR SOARES - PEPITA','MARCIO BERBET',
+  'MARCIO MORAES','PROF. GERALDO','SIDINEI JARDIM','SUBTENENTE MACEDO'
+];
+
+function carregarVereadores(){
+  try{
+    var s=localStorage.getItem('vereadores-lista');
+    if(s){ var arr=JSON.parse(s); if(Array.isArray(arr)&&arr.length) listaVereadores=arr; }
+  }catch(e){}
+  reconstruirSelectVereador();
+}
+function salvarVereadores(){
+  try{ localStorage.setItem('vereadores-lista', JSON.stringify(listaVereadores)); }catch(e){}
+}
+function reconstruirSelectVereador(){
+  var sel=document.getElementById('vereador-select');
+  var atual=sel.value;
+  sel.innerHTML='<option value="">Selecionar...</option>';
+  listaVereadores.forEach(function(n){
+    var o=document.createElement('option');
+    o.value=n; o.textContent=n; sel.appendChild(o);
+  });
+  if(atual && listaVereadores.indexOf(atual)>=0) sel.value=atual;
+}
+function selecionarVereador(v){
+  document.getElementById('vereador-display').textContent=v.toUpperCase()||'';
+  broadcastEstado();
+}
+function limparVereador(){
+  document.getElementById('vereador-select').value='';
+  document.getElementById('vereador-display').textContent='';
+  broadcastEstado();
+}
+
+/* Modal gerenciador */
+function abrirModalVereadores(){
+  renderizarListaVereadores();
+  document.getElementById('modal-vereadores').classList.add('aberto');
+}
+function fecharModalVereadores(){
+  document.getElementById('modal-vereadores').classList.remove('aberto');
+  reconstruirSelectVereador();
+}
+function adicionarVereador(){
+  var inp=document.getElementById('v-novo-nome');
+  var nome=inp.value.trim().toUpperCase();
+  if(!nome) return;
+  if(listaVereadores.indexOf(nome)>=0){ inp.select(); return; }
+  listaVereadores.push(nome);
+  salvarVereadores();
+  inp.value='';
+  renderizarListaVereadores();
+}
+function excluirVereador(idx){
+  listaVereadores.splice(idx,1);
+  salvarVereadores();
+  renderizarListaVereadores();
+}
+function moverVereador(idx, dir){
+  var novo=idx+dir;
+  if(novo<0||novo>=listaVereadores.length) return;
+  var tmp=listaVereadores[idx];
+  listaVereadores[idx]=listaVereadores[novo];
+  listaVereadores[novo]=tmp;
+  salvarVereadores();
+  renderizarListaVereadores();
+}
+function iniciarEdicao(idx){
+  renderizarListaVereadores(idx);
+}
+function salvarEdicao(idx){
+  var inp=document.getElementById('v-edit-'+idx);
+  var nome=inp.value.trim().toUpperCase();
+  if(!nome) return;
+  listaVereadores[idx]=nome;
+  salvarVereadores();
+  renderizarListaVereadores();
+}
+function renderizarListaVereadores(editando){
+  var lista=document.getElementById('v-lista');
+  lista.innerHTML='';
+  listaVereadores.forEach(function(nome,idx){
+    var div=document.createElement('div');
+    div.className='v-item';
+    if(idx===editando){
+      div.innerHTML=
+        '<input id="v-edit-'+idx+'" value="'+nome+'" maxlength="60" onkeydown="if(event.key===\'Enter\')salvarEdicao('+idx+')">'+
+        '<button class="v-btn-sm v-btn-save" onclick="salvarEdicao('+idx+')">Salvar</button>'+
+        '<button class="v-btn-sm v-btn-edit" onclick="renderizarListaVereadores()">Cancelar</button>';
+      setTimeout(function(){ var el=document.getElementById('v-edit-'+idx); if(el){el.focus();el.select();} },50);
+    }else{
+      div.innerHTML=
+        '<span class="v-item-nome">'+nome+'</span>'+
+        '<button class="v-btn-sm v-btn-up"   onclick="moverVereador('+idx+',-1)" title="Subir">▲</button>'+
+        '<button class="v-btn-sm v-btn-down" onclick="moverVereador('+idx+',1)"  title="Descer">▼</button>'+
+        '<button class="v-btn-sm v-btn-edit" onclick="iniciarEdicao('+idx+')">✏️</button>'+
+        '<button class="v-btn-sm v-btn-del"  onclick="excluirVereador('+idx+')">✕</button>';
+    }
+    lista.appendChild(div);
+  });
+  if(!listaVereadores.length){
+    lista.innerHTML='<div style="padding:14px;text-align:center;color:var(--text-dim);font-size:0.8rem">Lista vazia</div>';
+  }
+}
+document.getElementById('modal-vereadores').addEventListener('click',function(e){ if(e.target===this) fecharModalVereadores(); });
+carregarVereadores();
 function enviarMensagem(){var txt=document.getElementById('mensagem-input').value.trim().toUpperCase();document.getElementById('mensagem-display').textContent=txt;broadcastEstado();}
 function limparMensagem(){document.getElementById('mensagem-input').value='';document.getElementById('mensagem-display').textContent='';broadcastEstado();}
 document.getElementById('mensagem-input').addEventListener('keydown',function(e){if(e.key==='Enter')enviarMensagem();});
