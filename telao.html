@@ -3,205 +3,190 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Telão - Cronômetro de Plenário</title>
+<title>Telão — Cronômetro de Plenário</title>
 <style>
   :root {
-    --bg: #0a0f1e;
-    --accent: #1e90ff;
-    --text: #e8f0fe;
-    --text-dim: #6b8cae;
-    --green: #00c896;
-    --yellow: #f5a623;
-    --red: #e53935;
-    --white: #ffffff;
+    --bg: #000; --green: #0EFF31; --yellow: #f5a623;
+    --red: #FF0E3C; --white: #ffffff; --dim: #444;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body {
-    width: 100%; height: 100%;
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Courier New', monospace;
-    overflow: hidden;
+  html, body { width: 100%; height: 100%; background: var(--bg); overflow: hidden; }
+
+  /* Um único keyframe — tudo que tiver .pisca usa ele, sempre sincronizado */
+  @keyframes pisca { 0%,49.9%{opacity:1} 50%,100%{opacity:0} }
+  .pisca { animation: pisca 1s step-start infinite; }
+
+  .wrapper {
+    width: 100vw; height: 100vh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
   }
-  .telao-wrapper {
-    width: 100vw;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 0;
-  }
+
   /* Mensagem */
   .t-mensagem {
-    font-family: 'Segoe UI', Arial, sans-serif;
-    font-size: 3.2vw;
-    font-weight: 700;
-    color: var(--red);
-    letter-spacing: 4px;
-    text-transform: uppercase;
-    min-height: 5vh;
-    text-align: center;
-    margin-bottom: 1vh;
+    font-family: Arial, sans-serif;
+    font-size: 5.5vw; font-weight: 900;
+    color: var(--red); letter-spacing: 4px;
+    text-transform: uppercase; text-align: center; line-height: 1;
   }
-  /* Vereador */
-  .t-vereador {
-    font-family: 'Segoe UI', Arial, sans-serif;
-    font-size: 2.8vw;
-    font-weight: 700;
-    color: var(--accent);
-    letter-spacing: 4px;
-    text-transform: uppercase;
-    min-height: 5vh;
-    text-align: center;
-    margin-bottom: 2vh;
+  .t-mensagem:empty { display: none; }
+
+  /* TEMPO EXCEDIDO — acima do contador */
+  .t-excedido {
+    font-family: Arial, sans-serif;
+    font-size: 5.5vw; font-weight: 900;
+    color: var(--red); letter-spacing: 4px;
+    text-transform: uppercase; text-align: center; line-height: 1;
   }
-  /* Cronômetro principal */
+  .t-excedido:empty { display: none; }
+
+  /* Contador principal */
   .t-principal {
-    font-size: 22vw;
-    font-weight: 900;
-    letter-spacing: 2vw;
-    color: var(--white);
-    text-align: center;
-    line-height: 1;
-    transition: color 0.3s;
+    font-family: Arial, sans-serif;
+    font-size: 28.6vw; font-weight: 900;
+    color: var(--green); text-align: center;
+    line-height: 0.92; letter-spacing: 0;
   }
   .t-principal.amarelo { color: var(--yellow); }
   .t-principal.vermelho { color: var(--red); }
-  @keyframes pisca { 0%,100%{opacity:1} 50%{opacity:0} }
-  .t-principal.piscando { animation: pisca 0.6s infinite; }
-  /* Tempo excedido */
-  .t-excedido {
-    font-family: 'Segoe UI', Arial, sans-serif;
-    font-size: 3vw;
-    font-weight: 700;
-    color: var(--red);
-    letter-spacing: 6px;
-    text-transform: uppercase;
-    min-height: 5vh;
-    text-align: center;
-    margin-top: 1vh;
+
+  /* Vereador */
+  .t-vereador {
+    font-family: Arial, sans-serif;
+    font-size: 3.8vw; font-weight: 700;
+    color: var(--white); letter-spacing: 3px;
+    text-transform: uppercase; text-align: center; line-height: 1;
   }
-  .t-excedido.piscando { animation: pisca 0.6s infinite; }
-  /* Secundários */
-  .t-row-sec {
-    display: flex;
-    gap: 6vw;
-    margin-top: 2vh;
-    align-items: flex-end;
+  .t-vereador:empty { display: none; }
+
+  /* Aparte e QO */
+  .t-sec-row {
+    display: none;
+    align-items: baseline; justify-content: center;
+    gap: 2vw; line-height: 1;
   }
-  .t-sec {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
+  .t-sec-row.visivel { display: flex; }
+
   .t-sec-label {
-    font-family: 'Segoe UI', Arial, sans-serif;
-    font-size: 1.2vw;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    color: var(--text-dim);
-    margin-bottom: 4px;
+    font-family: Arial, sans-serif;
+    font-size: 5vw; font-weight: 700;
+    color: var(--white); letter-spacing: 1px;
+    text-transform: uppercase; line-height: 1;
   }
   .t-sec-display {
-    font-size: 5.5vw;
-    font-weight: 900;
-    letter-spacing: 0.4vw;
-    color: var(--white);
-    transition: color 0.3s;
+    font-family: Arial, sans-serif;
+    font-size: 12vw; font-weight: 900;
+    color: var(--white); letter-spacing: 0; line-height: 1;
   }
   .t-sec-display.amarelo { color: var(--yellow); }
   .t-sec-display.vermelho { color: var(--red); }
-  .t-sec-display.piscando { animation: pisca 0.6s infinite; }
-  /* Rodapé */
+
   .t-footer {
-    position: absolute;
-    bottom: 1.5vh;
-    left: 50%;
-    transform: translateX(-50%);
-    font-family: 'Segoe UI', Arial, sans-serif;
-    font-size: 0.9vw;
-    color: var(--text-dim);
-    letter-spacing: 4px;
-    text-transform: uppercase;
-  }
-  /* Aguardando */
-  .t-aguardando {
-    font-family: 'Segoe UI', Arial, sans-serif;
-    font-size: 1.5vw;
-    color: var(--text-dim);
-    letter-spacing: 4px;
-    text-transform: uppercase;
-    opacity: 0.5;
+    position: absolute; bottom: 1vh; left: 50%; transform: translateX(-50%);
+    font-family: Arial, sans-serif; font-size: 1vw; color: var(--dim);
+    letter-spacing: 4px; text-transform: uppercase; white-space: nowrap;
   }
 </style>
 </head>
 <body>
-<div class="telao-wrapper">
+<div class="wrapper">
   <div class="t-mensagem"  id="t-mensagem"></div>
-  <div class="t-vereador"  id="t-vereador"></div>
-  <div class="t-principal" id="t-principal">--:--</div>
   <div class="t-excedido"  id="t-excedido"></div>
-  <div class="t-row-sec">
-    <div class="t-sec">
-      <div class="t-sec-label">Aparte</div>
-      <div class="t-sec-display" id="t-aparte">01:00</div>
-    </div>
-    <div class="t-sec">
-      <div class="t-sec-label">Questão de Ordem</div>
-      <div class="t-sec-display" id="t-qo">02:00</div>
-    </div>
+  <div class="t-principal" id="t-principal">--:--</div>
+  <div class="t-vereador"  id="t-vereador"></div>
+  <div class="t-sec-row"   id="t-sec-aparte">
+    <span class="t-sec-label">Aparte</span>
+    <span class="t-sec-display" id="t-aparte">01:00</span>
   </div>
-  <div class="t-footer">Câmara Municipal — Cronômetro de Plenário</div>
+  <div class="t-sec-row"   id="t-sec-qo">
+    <span class="t-sec-label">Questão de Ordem</span>
+    <span class="t-sec-display" id="t-qo">02:00</span>
+  </div>
+  <div class="t-footer">Câmara Municipal de Campo Mourão</div>
 </div>
 <script>
 var bc = new BroadcastChannel('cronometro-plenario');
-function fmt(s){
-  var neg=s<0,abs=Math.abs(s),m=Math.floor(abs/60),ss=abs%60;
+
+function fmt(s) {
+  var neg=s<0, abs=Math.abs(s), m=Math.floor(abs/60), ss=abs%60;
   return (neg?'-':'')+String(m).padStart(2,'0')+':'+String(ss).padStart(2,'0');
 }
-bc.onmessage = function(e){
+
+// Aplica/remove pisca em múltiplos elementos de uma vez
+function setPisca(els, ativo) {
+  els.forEach(function(el) {
+    if (!el) return;
+    if (ativo) el.classList.add('pisca');
+    else { el.classList.remove('pisca'); el.style.opacity='1'; }
+  });
+}
+
+bc.onmessage = function(e) {
   var d = e.data;
-  if(d.tipo !== 'estado') return;
+  if (d.tipo !== 'estado') return;
+
+  var rp = d.principal.restante;
+  var ra = d.aparte.restante;
+  var rq = d.qo.restante;
+  var va = d.aparte.visivel;
+  var vq = d.qo.visivel;
+
+  var elMsg  = document.getElementById('t-mensagem');
+  var elEx   = document.getElementById('t-excedido');
+  var elP    = document.getElementById('t-principal');
+  var elV    = document.getElementById('t-vereador');
+  var elSA   = document.getElementById('t-sec-aparte');
+  var elA    = document.getElementById('t-aparte');
+  var elSQ   = document.getElementById('t-sec-qo');
+  var elQ    = document.getElementById('t-qo');
 
   // Mensagem
-  document.getElementById('t-mensagem').textContent = d.mensagem || '';
+  elMsg.textContent = d.mensagem || '';
 
   // Vereador
-  var v = (d.vereador && d.vereador !== '—') ? d.vereador : '';
-  document.getElementById('t-vereador').textContent = v;
+  elV.textContent = d.vereador || '';
 
-  // Principal
-  var rp = d.principal.restante;
-  var ep = document.getElementById('t-principal');
-  var ex = document.getElementById('t-excedido');
-  ep.textContent = fmt(rp);
-  ep.className = 't-principal';
-  ex.textContent = '';
-  ex.className = 't-excedido';
-  if(rp <= 0){
-    ep.className = 't-principal vermelho piscando';
-    ex.textContent = 'TEMPO EXCEDIDO';
-    ex.className = 't-excedido piscando';
-  } else if(rp <= 60){
-    ep.className = 't-principal amarelo';
+  // Contador principal — cor
+  elP.textContent = fmt(rp);
+  elP.className = 't-principal';
+  if (rp <= 0)       elP.className = 't-principal vermelho';
+  else if (rp <= 60) elP.className = 't-principal amarelo';
+
+  // TEMPO EXCEDIDO — texto acima, determina quem pede piscar
+  elEx.textContent = '';
+  var excedidoPrincipal = rp <= 0;
+  var excedidoAparte    = va && ra <= 0;
+  var excedidoQO        = vq && rq <= 0;
+
+  if (excedidoPrincipal) {
+    elEx.textContent = 'TEMPO EXCEDIDO';
+  } else if (excedidoAparte) {
+    elEx.textContent = 'TEMPO EXCEDIDO — APARTE';
+  } else if (excedidoQO) {
+    elEx.textContent = 'TEMPO EXCEDIDO — QUESTÃO DE ORDEM';
   }
 
+  // Piscar: todos juntos quando qualquer excedido estiver ativo
+  var algumExcedido = excedidoPrincipal || excedidoAparte || excedidoQO;
+  setPisca([elEx, elP, elA, elQ], algumExcedido);
+
   // Aparte
-  var ra = d.aparte.restante;
-  var ea = document.getElementById('t-aparte');
-  ea.textContent = fmt(ra);
-  ea.className = 't-sec-display';
-  if(ra <= 0) ea.className = 't-sec-display vermelho piscando';
-  else if(ra <= 30) ea.className = 't-sec-display amarelo';
+  elSA.className = 't-sec-row' + (va ? ' visivel' : '');
+  if (va) {
+    elA.textContent = fmt(ra);
+    elA.className = 't-sec-display';
+    if (ra <= 0)       elA.className = 't-sec-display vermelho';
+    else if (ra <= 30) elA.className = 't-sec-display amarelo';
+  }
 
   // QO
-  var rq = d.qo.restante;
-  var eq = document.getElementById('t-qo');
-  eq.textContent = fmt(rq);
-  eq.className = 't-sec-display';
-  if(rq <= 0) eq.className = 't-sec-display vermelho piscando';
-  else if(rq <= 60) eq.className = 't-sec-display amarelo';
+  elSQ.className = 't-sec-row' + (vq ? ' visivel' : '');
+  if (vq) {
+    elQ.textContent = fmt(rq);
+    elQ.className = 't-sec-display';
+    if (rq <= 0)       elQ.className = 't-sec-display vermelho';
+    else if (rq <= 60) elQ.className = 't-sec-display amarelo';
+  }
 };
 </script>
 </body>
